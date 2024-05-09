@@ -1,54 +1,65 @@
 import pandas as pd
 from dataretrieval import nwis
 
-# Load site data
-data = 'ca_water_sites.csv'
-sites = pd.read_csv(data, dtype={'site_no': str})['site_no']
-sites_list = sites.tolist()
+class WaterDataProcessor:
+    def __init__(self, filepath, start_date, end_date, target_param):
+        self.filepath = filepath
+        self.sites = self.load_site_data()
+        self.start_date = start_date
+        self.end_date = end_date
+        self.target_param = target_param
+        self.df = None
 
-# Define the timeframe
-start_date = '2024-05-01'
-end_date = '2024-05-02'
-target_param = '00010'
+    #Load site data
+    def load_site_data(self):
+        return pd.read_csv(self.filepath, dtype={'site_no': str})['site_no'].tolist()
 
-# DataFrame to store the results
-results_df = pd.DataFrame()
+    #Retrieve water data from NWIS service
+    def retrieve_data(self):
+        self.df, _ = nwis.get_iv(sites=self.sites,
+                                 start=self.start_date,
+                                 end=self.end_date)
+        self.df.reset_index(inplace=True)
 
-df, md = nwis.get_iv(sites=sites_list,
-                     start=start_date,
-                     end=end_date)
+    #Filter out non-numeric columns after certain index
+    def filter_columns_by_header(self, numeric_threshold):
+        initial_columns = self.df.columns[:numeric_threshold].tolist()
+        numeric_headers = [header for header in self.df.columns[numeric_threshold:] if header.isnumeric()]
+        selected_columns = initial_columns + numeric_headers
+        self.df = self.df[selected_columns]
 
-# Filter to keep rows where '00010' is not NaN
-df = df[df[target_param].notna()]
+    #Remove missing target_param values and select non-empty float columns
+    def preprocess_data(self):
+        self.df = self.df[self.df[self.target_param].notna()]
+        float_cols = self.df.select_dtypes(include=['float64']).columns
+        self.df = self.df.dropna(subset=[col for col in float_cols if col != self.target_param], how='all')
 
-# Identify float64 columns starting from the third column
-float_cols = df.iloc[:, 2:].select_dtypes(include=['float64']).columns.tolist()
+    #Apply a dynamic threshold for column data completeness
+    def apply_completeness_threshold(self, threshold_ratio):
+        threshold = self.df.shape[0] / threshold_ratio
+        self.df = self.df.dropna(axis=1, thresh=threshold)
 
-# Combine the first two columns with the float64 columns from the third column onwards
-selected_columns = df.columns[:2].tolist() + float_cols
-df = df[selected_columns]
+    #Save filtered dataframe
+    def save_data(self, filename):
+        self.df.to_csv(filename, index=False)
 
-# Exclude '00010' from the columns to check for all NaNs
-float_cols_to_check = [col for col in float_cols if col != target_param]
+def main():
+    file_name = 'ca_water_sites.csv'
+    start_date = '2024-05-01'
+    end_date = '2024-05-02'
+    target_param = '00010'
+    final_file_name = 'filtered_data.csv'
 
-# Remove rows where all float64 values, excluding '00010', are NaN
-df = df.dropna(subset=float_cols_to_check, how='all')
+    try:
+        processor = WaterDataProcessor(file_name, start_date, end_date, target_param)
+        processor.retrieve_data()
+        processor.filter_columns_by_header(2)
+        processor.preprocess_data()
+        processor.apply_completeness_threshold(20)
+        processor.save_data(final_file_name)
+        print(processor.df.dtypes)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-threshold = df.shape[0] / 20
-
-df = df.dropna(axis=1, thresh=threshold)
-
-# Identifying numeric headers beyond the second column
-numeric_headers = [header for header in df.columns[2:] if header.isnumeric()]
-
-# Preparing the list of columns to keep: first two columns and additional numeric columns
-to_keep = df.columns[:2].tolist() + numeric_headers
-
-# Creating a new DataFrame with the specified columns
-df = df[to_keep]
-
-# Save the filtered data to CSV
-df.to_csv('filtered_data.csv')
-
-# Print data types to confirm
-print(df.dtypes)
+if __name__ == '__main__':
+    main()
