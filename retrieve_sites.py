@@ -3,8 +3,10 @@ import pandas as pd
 from io import StringIO
 from utils import timer
 
+target_param = '00095'
+
 class WaterSiteDataFetcher:
-    def __init__(self, states, surface_water, target_param, final_filepath):
+    def __init__(self, states, surface_water, final_filepath):
         self.states = states
         self.surface_water = surface_water
         self.target_param = target_param
@@ -44,9 +46,8 @@ class WaterSiteDataFetcher:
 def retrieve_sites():
     states = ['ca']
     site_types = ['ES', 'LK', 'OC', 'OC-CO', 'ST', 'ST-CA', 'ST-DCH', 'ST-TS', 'WE']
-    target_param = '00010'
     final_filepath = 'ca_water_sites.csv'
-    fetcher = WaterSiteDataFetcher(states, site_types, target_param, final_filepath)
+    fetcher = WaterSiteDataFetcher(states, site_types, final_filepath)
     fetcher.run()
 
 if __name__ == '__main__':
