@@ -3,6 +3,7 @@ from retrieve_sites import retrieve_sites
 from retrieve_data import retrieve_data_from_sites
 from process_data import process_data_from_sites
 from model import model_data
+from residual_analysis import ResidualAnalysis
 from utils import print_status, handle_errors, timer
 
 @timer
@@ -25,6 +26,10 @@ def main():
         print_status("Creating models", "in progress")
         model_data()
         print_status("Models created", "completed")
+
+        print_status("Analyzing residuals", "in progress")
+        ResidualAnalysis()
+        print_status("Residuals Analyzed", "completed")
 
     except Exception as e:
         handle_errors(e)
