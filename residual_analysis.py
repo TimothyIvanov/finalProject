@@ -52,7 +52,7 @@ class ResidualAnalysis:
         plt.tight_layout()
         plt.show()
 
-def ResidualAnalysis():
+def Residuals(target_param=target_param):
     filepath = 'clean_data.csv'
     try:
         modeler = ResidualAnalysis(filepath, target_param)
@@ -61,4 +61,4 @@ def ResidualAnalysis():
         print(f"An error occurred: {e}")
 
 if __name__ == '__main__':
-    ResidualAnalysis()
+    Residuals()
