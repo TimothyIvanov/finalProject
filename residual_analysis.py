@@ -8,7 +8,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from retrieve_sites import target_param
 
-class WaterDataModeler:
+class ResidualAnalysis:
     def __init__(self, filepath, target_param):
         self.df = pd.read_csv(filepath)
         self.target_param = target_param
@@ -34,7 +34,7 @@ class WaterDataModeler:
         # Plotting the results
         self.ax1.scatter(X_test, y_test, color='blue', label='Actual')
         self.ax1.plot(X_test, y_pred, color='red', label='Predicted')
-        self.ax1.set_title(f'Linear Regression - Feature 00480\nR²: {r2:.2f}, MSE: {mse:.2f}')
+        self.ax1.set_title(f'Linear Regression - Feature 00480\nR2: {r2:.2f}, MSE: {mse:.2f}')
         self.ax1.set_xlabel('00480')
         self.ax1.set_ylabel(self.target_param)
         self.ax1.legend()
@@ -52,7 +52,13 @@ class WaterDataModeler:
         plt.tight_layout()
         plt.show()
 
-if __name__ == '__main__':
+def ResidualAnalysis():
     filepath = 'clean_data.csv'
-    modeler = WaterDataModeler(filepath, target_param)
-    modeler.run()
+    try:
+        modeler = ResidualAnalysis(filepath, target_param)
+        modeler.run()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == '__main__':
+    ResidualAnalysis()
