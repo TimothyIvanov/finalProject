@@ -21,7 +21,7 @@ class ResidualAnalysis:
     def preprocess_data(self):
         # Specifically focus on the best feature 00480
         X = self.df[['00480']].dropna()
-        y = self.df.loc[X.index, self.target_param]  # Ensure alignment of target and feature
+        y = self.df.loc[X.index, self.target_param]  # Align target and feature
         return train_test_split(X, y, test_size=0.2, random_state=42)
 
     def train_and_evaluate(self):
