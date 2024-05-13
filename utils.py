@@ -1,7 +1,7 @@
 from time import time
 
 def timer(func):
-    #Decorator to measure execution time of a function.
+    #Decorator to measure execution time of a function
     def wrap_func(*args, **kwargs):
         t1 = time()
         result = func(*args, **kwargs)
