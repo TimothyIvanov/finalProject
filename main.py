@@ -1,14 +1,13 @@
-# main.py
 from retrieve_sites import retrieve_sites
 from retrieve_data import retrieve_data_from_sites
 from process_data import process_data_from_sites
 from model import model_data
-from residual_analysis import ResidualAnalysis
+from residual_analysis import Residuals
 from utils import print_status, handle_errors, timer
 
 @timer
 def main():
-    print('Starting the application...')
+    print('Starting the application...', flush=True)
 
     try:
         print_status("Retrieving sites", "in progress")
@@ -28,7 +27,7 @@ def main():
         print_status("Models created", "completed")
 
         print_status("Analyzing residuals", "in progress")
-        ResidualAnalysis()
+        Residuals()
         print_status("Residuals Analyzed", "completed")
 
     except Exception as e:
